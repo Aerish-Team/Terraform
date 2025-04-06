@@ -1,3 +1,4 @@
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment
 resource "azurerm_container_app_environment" "main" {
   name                        = "${local.name_prefix}-cae"
   location                    = azurerm_resource_group.main.location
@@ -10,11 +11,13 @@ resource "azurerm_container_app_environment" "main" {
   # }
 }
 
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app
 resource "azurerm_container_app" "api" {
   name                            = "${local.name_prefix}-ca-api"
   resource_group_name             = azurerm_resource_group.main.name
   container_app_environment_id    = azurerm_container_app_environment.main.id
   revision_mode                   = "Single"
+  max_inactive_revisions          = 0
   tags = var.tags
 
   identity {
@@ -66,19 +69,32 @@ resource "azurerm_container_app" "api" {
   }
 }
 
-resource "time_sleep" "wait_20_seconds" {
-  create_duration = "20s"
-  depends_on = [
-    cloudflare_record.api_TXT
-  ]
+output "ApiUrl_fqdn" {
+  value = azurerm_container_app.api.ingress[0].fqdn
 }
 
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_custom_domain
-resource "azurerm_container_app_custom_domain" "custom_domain" {
-  name                 = "${cloudflare_record.api_cname.name}.${var.domain_name}"
-  container_app_id     = azurerm_container_app.api.id
 
-  depends_on = [
-    time_sleep.wait_20_seconds
-  ]
-}
+
+# resource "time_sleep" "wait_20_seconds" {
+#   create_duration = "20s"
+#   depends_on = [
+#     cloudflare_record.api_TXT
+#   ]
+# }
+
+# # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_custom_domain
+# resource "azurerm_container_app_custom_domain" "custom_domain" {
+#   name                 = "${cloudflare_record.api_cname.name}.${var.domain_name}"
+#   container_app_id     = azurerm_container_app.api.id
+#   certificate_binding_type = "SniEnabled"
+
+#   depends_on = [
+#     time_sleep.wait_20_seconds
+#   ]
+
+#   lifecycle {
+#     ignore_changes = [
+#       certificate_binding_type
+#     ]
+#   }
+# }

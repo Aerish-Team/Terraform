@@ -33,6 +33,10 @@ resource "azurerm_mssql_database" "main" {
   # }
 }
 
+output "DB_Connection_String" {
+  value = "Server=${azurerm_mssql_server.main.fully_qualified_domain_name};Database=${azurerm_mssql_database.main.name};Encrypt=True;TrustServerCertificate=False;User Id=${azurerm_mssql_server.main.administrator_login};Password={database_admin_password};"
+}
+
 resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
   name                = "AllowAzureServices"
   server_id           = azurerm_mssql_server.main.id
