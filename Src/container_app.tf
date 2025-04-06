@@ -15,11 +15,7 @@ resource "azurerm_container_app" "api" {
   resource_group_name             = azurerm_resource_group.main.name
   container_app_environment_id    = azurerm_container_app_environment.main.id
   revision_mode                   = "Single"
-
-  secret {
-    name  = "ghcr-pat"
-    value = var.ghcr_pat
-  }
+  tags = var.tags
 
   identity {
     type = "UserAssigned"
@@ -28,7 +24,7 @@ resource "azurerm_container_app" "api" {
     ]
   }
 
- secret {
+  secret {
     identity              = azurerm_user_assigned_identity.server.id
     name                  = "ghcr-pat"
     key_vault_secret_id   = azurerm_key_vault_secret.ghcr_pat.id
@@ -50,7 +46,7 @@ resource "azurerm_container_app" "api" {
       }
     }
 
-    min_replicas = 1
+    min_replicas = 0
     max_replicas = 3
   }
 
@@ -68,6 +64,21 @@ resource "azurerm_container_app" "api" {
       percentage      = 100
     }
   }
+}
 
-  tags = var.tags
+resource "time_sleep" "wait_20_seconds" {
+  create_duration = "20s"
+  depends_on = [
+    cloudflare_record.api_TXT
+  ]
+}
+
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_custom_domain
+resource "azurerm_container_app_custom_domain" "custom_domain" {
+  name                 = "${cloudflare_record.api_cname.name}.${var.domain_name}"
+  container_app_id     = azurerm_container_app.api.id
+
+  depends_on = [
+    time_sleep.wait_20_seconds
+  ]
 }

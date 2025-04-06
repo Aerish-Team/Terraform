@@ -18,10 +18,6 @@ locals {
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "main" {
-  name     = "${local.name_prefix}-rg"
-  location = "Southeast Asia"
-}
 
 /*
 resource "azurerm_key_vault" "main" {

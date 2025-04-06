@@ -3,6 +3,13 @@ variable "subscription_id" {
   type        = string
 }
 
+variable "tags" {
+  type = map(string)
+  default = {
+    environment = "QA"
+  }
+}
+
 variable "env_name" {
   description = "The Environment prefix for Azure services"
   type        = string
@@ -44,9 +51,31 @@ variable "database_admin_password" {
   sensitive   = true
 }
 
-variable "tags" {
-  type = map(string)
-  default = {
-    environment = "QA"
-  }
+
+
+
+# Cloudflare
+
+variable "domain_name" {
+  description = "Domain name"
+  type        = string
+  default     = "dagpin.com"
+}
+
+variable "cloudflare_api_key" {
+  description = "API key for Cloudflare"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_zone_id" {
+  description = "Zone ID for the Cloudflare domain"
+  type        = string
+  default       = "f59f0ce0899e670c1a23f4023fda759f"
+}
+
+variable "cloudflare_email" {
+  description = "Email associated with Cloudflare account"
+  type        = string
+  default       = "vincent.dagpin@gmail.com"
 }
