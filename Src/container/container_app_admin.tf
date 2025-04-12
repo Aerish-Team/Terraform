@@ -1,7 +1,7 @@
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app
-resource "azurerm_container_app" "api" {
-  name                            = "${local.name_prefix}-ca-api"
-  resource_group_name             = azurerm_resource_group.main.name
+resource "azurerm_container_app" "admin" {
+  name                            = "${var.name_prefix}-ca-admin"
+  resource_group_name             = var.resource_group_name
   container_app_environment_id    = azurerm_container_app_environment.main.id
   revision_mode                   = "Single"
   max_inactive_revisions          = 0
@@ -10,35 +10,27 @@ resource "azurerm_container_app" "api" {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.server.id
+      var.server_shared_identity_id
     ]
   }
 
   secret {
-    identity              = azurerm_user_assigned_identity.server.id
+    identity              = var.server_shared_identity_id
     name                  = "ghcr-pat"
-    key_vault_secret_id   = azurerm_key_vault_secret.ghcr_pat.id
-  }
-
-  secret {
-    identity              = azurerm_user_assigned_identity.server.id
-    name                  = "db-connection-string"
-    key_vault_secret_id   = azurerm_key_vault_secret.dbconnectionstring.id
+    key_vault_secret_id   = var.keyvault_ghcr_path_id
   }
 
   template {
     container {
-      name   = "${local.name_prefix}-c-api"
-      image  = "${var.ghcr_url}/vgdagpin/aerish.api:${var.aerish_version_api}"
+      name   = "${var.name_prefix}-c-admin"
+      image  = "${var.ghcr_url}/vgdagpin/aerish.admin:${var.aerish_version_admin}"
       cpu    = "0.5"
       memory = "1Gi"
+      args   = []
+      command = []
       env {
         name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
-        value = azurerm_application_insights.main.connection_string
-      }
-      env {
-        name = "ConnectionStrings__AerishDbContext_MSSQLConStr"
-        secret_name = "db-connection-string"
+        value = var.application_insights_connection_string
       }
     }
 
@@ -54,7 +46,7 @@ resource "azurerm_container_app" "api" {
 
   ingress {
     external_enabled = true
-    target_port      = 17000
+    target_port      = 15000
     traffic_weight {
       latest_revision = true
       percentage      = 100
@@ -62,8 +54,8 @@ resource "azurerm_container_app" "api" {
   }
 }
 
-output "Api_fqdn" {
-  value = azurerm_container_app.api.ingress[0].fqdn
+output "Admin_fqdn" {
+  value = azurerm_container_app.admin.ingress[0].fqdn
 }
 
 
