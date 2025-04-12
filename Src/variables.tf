@@ -45,6 +45,18 @@ variable "aerish_version_admin" {
   default     = "latest"
 }
 
+variable "aerish_version_reports" {
+  description = "The version of aerish Reports"
+  type        = string
+  default     = "latest"
+}
+
+variable "aerish_version_eportal" {
+  description = "The version of aerish EPortal"
+  type        = string
+  default     = "latest"
+}
+
 variable "services_prefix" {
   description = "The prefix of each services (eg. Client Name)"
   type        = string

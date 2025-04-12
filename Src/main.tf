@@ -33,6 +33,8 @@ module "container" {
   ghcr_username                           = var.ghcr_username
   aerish_version_api                      = var.aerish_version_api
   aerish_version_admin                    = var.aerish_version_admin
+  aerish_version_reports                    = var.aerish_version_reports
+  aerish_version_eportal                    = var.aerish_version_eportal
   tags                                    = var.tags
 }
 
