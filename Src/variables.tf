@@ -33,8 +33,14 @@ variable "ghcr_pat" {
   type        = string
 }
 
-variable "aerish_version" {
-  description = "The version of test flow builder"
+variable "aerish_version_api" {
+  description = "The version of aerish API"
+  type        = string
+  default     = "latest"
+}
+
+variable "aerish_version_admin" {
+  description = "The version of aerish Admin"
   type        = string
   default     = "latest"
 }

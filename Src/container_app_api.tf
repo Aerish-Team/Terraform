@@ -1,16 +1,3 @@
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment
-resource "azurerm_container_app_environment" "main" {
-  name                        = "${local.name_prefix}-cae"
-  location                    = azurerm_resource_group.main.location
-  resource_group_name         = azurerm_resource_group.main.name
-  log_analytics_workspace_id  = azurerm_log_analytics_workspace.main.id
-  # infrastructure_subnet_id    = azurerm_subnet.subnet.id
-  # workload_profile {
-  #   name = "Consumption"
-  #   workload_profile_type = "Consumption"
-  # }
-}
-
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app
 resource "azurerm_container_app" "api" {
   name                            = "${local.name_prefix}-ca-api"
@@ -33,10 +20,16 @@ resource "azurerm_container_app" "api" {
     key_vault_secret_id   = azurerm_key_vault_secret.ghcr_pat.id
   }
 
+  secret {
+    identity              = azurerm_user_assigned_identity.server.id
+    name                  = "db-connection-string"
+    key_vault_secret_id   = azurerm_key_vault_secret.dbconnectionstring.id
+  }
+
   template {
     container {
       name   = "${local.name_prefix}-c-api"
-      image  = "${var.ghcr_url}/vgdagpin/aerish.api:${var.aerish_version}"
+      image  = "${var.ghcr_url}/vgdagpin/aerish.api:${var.aerish_version_api}"
       cpu    = "0.5"
       memory = "1Gi"
       env {
@@ -44,8 +37,8 @@ resource "azurerm_container_app" "api" {
         value = azurerm_application_insights.main.connection_string
       }
       env {
-        name  = "ConnectionStrings__AerishDbContext_MSSQLConStr"
-        value = "Server=${azurerm_mssql_server.main.fully_qualified_domain_name};Database=${azurerm_mssql_database.main.name};Encrypt=True;TrustServerCertificate=False;"
+        name = "ConnectionStrings__AerishDbContext_MSSQLConStr"
+        secret_name = "db-connection-string"
       }
     }
 
@@ -61,7 +54,7 @@ resource "azurerm_container_app" "api" {
 
   ingress {
     external_enabled = true
-    target_port      = 8080
+    target_port      = 17000
     traffic_weight {
       latest_revision = true
       percentage      = 100
@@ -69,7 +62,7 @@ resource "azurerm_container_app" "api" {
   }
 }
 
-output "ApiUrl_fqdn" {
+output "Api_fqdn" {
   value = azurerm_container_app.api.ingress[0].fqdn
 }
 

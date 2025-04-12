@@ -58,6 +58,18 @@ resource "azurerm_key_vault_secret" "dbaminpassword" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret.html
+# terraform import azurerm_key_vault_secret.dbaminpassword "https://teeledger-q-kv.vault.azure.net/secrets/db-admin-password/eaa5aa755edf4fd092eac03aded4f089"
+resource "azurerm_key_vault_secret" "dbconnectionstring" {
+  name         = "db-connection-string"
+  value        = "Server=${azurerm_mssql_server.main.fully_qualified_domain_name};Database=${azurerm_mssql_database.main.name};Encrypt=True;TrustServerCertificate=False;User Id=${azurerm_mssql_server.main.administrator_login};Password=${var.database_admin_password};"
+  key_vault_id = azurerm_key_vault.main.id
+  depends_on = [
+    azurerm_key_vault_access_policy.current_user_access_policy
+  ]
+}
+
+
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret.html
 # terraform import azurerm_key_vault_secret.ghcr_pat "https://teeledger-q-kv.vault.azure.net/secrets/ghcr-pat/1c1e6e49b56742559c29c45dd8bd95ce"
 resource "azurerm_key_vault_secret" "ghcr_pat" {
   name         = "ghcr-pat"
