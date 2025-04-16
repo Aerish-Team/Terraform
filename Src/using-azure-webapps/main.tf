@@ -13,7 +13,7 @@ provider "azurerm" {
 }
 
 locals {
-  name_prefix = "${var.services_prefix}-${var.env_name}"
+  name_prefix = "${var.services_prefix}-${var.env_name}-wa"
 }
 
 data "azurerm_client_config" "current" {}
