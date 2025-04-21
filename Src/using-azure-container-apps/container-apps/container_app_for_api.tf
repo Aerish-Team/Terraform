@@ -42,6 +42,14 @@ resource "azurerm_container_app" "api" {
         name = "ConnectionStrings__AerishDbContext_MSSQLConStr"
         secret_name = "db-connection-string"
       }
+      env {
+        name = "ASPNETCORE_ENVIRONMENT"
+        value = "Staging"
+      }
+      env {
+        name = "SETTINGS_ENVIRONMENT"
+        value = "QA"
+      }
     }
 
     min_replicas = 0

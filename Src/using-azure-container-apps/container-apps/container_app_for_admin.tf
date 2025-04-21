@@ -32,6 +32,18 @@ resource "azurerm_container_app" "admin" {
         name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
         value = var.application_insights_connection_string
       }
+      env {
+        name = "ASPNETCORE_ENVIRONMENT"
+        value = "Staging"
+      }
+      env {
+        name = "SETTINGS_ENVIRONMENT"
+        value = "QA"
+      }
+      env {
+        name = "API_BASE_URL"
+        value = azurerm_container_app.api.ingress[0].fqdn
+      }
     }
 
     min_replicas = 0
